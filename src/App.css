@@ -1,0 +1,69 @@
+.summary {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 0;
+}
+
+.summary > div {
+  flex: 1;
+  border: 1px solid #ccc;
+  padding: 20px;
+  margin: 0 10px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+table, th, td {
+  border: 1px solid #ccc;
+}
+
+th, td {
+  padding: 10px;
+  text-align: center;
+}
+
+.summary {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.summary div {
+  color: black;
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+  text-align: center;
+}
+
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.filters div {
+  display: flex;
+  align-items: center;
+  margin: 5px 0;
+}
+
+.filters label {
+  margin-right: 10px;
+}
