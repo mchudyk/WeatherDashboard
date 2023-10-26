@@ -1,4 +1,6 @@
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Link, useParams} from 'react-router-dom';
 import './App.css';
 
 function App() {
@@ -6,8 +8,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [tempRange, setTempRange] = useState({ min: '', max: '' });
   const [humidityRange, setHumidityRange] = useState({ min: '', max: '' });
-
-  const API_KEY = '91954f7fae494fc596b9343839ebcdbb'; // Replace with your API key
+  const API_KEY = '91954f7fae494fc596b9343839ebcdbb';
 
   useEffect(() => {
     async function fetchData() {
@@ -19,7 +20,6 @@ function App() {
         console.error('Error fetching weather data:', error);
       }
     }
-
     fetchData();
   }, []);
 
@@ -29,26 +29,32 @@ function App() {
     .filter(day => (humidityRange.min ? day.rh >= humidityRange.min : true) && (humidityRange.max ? day.rh <= humidityRange.max : true))
     : [];
 
-  // Calculate summary statistics
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Dashboard filteredData={filteredData} setSearchTerm={setSearchTerm} setTempRange={setTempRange} setHumidityRange={setHumidityRange} />} />
+        <Route path="/detail/:date" element={<Detail weatherData={weatherData} />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+function Dashboard({ filteredData, setSearchTerm, setTempRange, setHumidityRange }) {
   const totalDays = filteredData.length;
   const averageTemp = (filteredData.reduce((acc, curr) => acc + curr.temp, 0) / totalDays).toFixed(2);
   const averageHumidity = (filteredData.reduce((acc, curr) => acc + curr.rh, 0) / totalDays).toFixed(2);
 
   return (
     <div>
-      {/* Summary Blocks */}
       <div className="summary">
         <div>Total Days: {totalDays}</div>
         <div>Average Temperature: {averageTemp}°C</div>
         <div>Average Humidity: {averageHumidity}%</div>
       </div>
-
-      {/* Filters */}
       <div className="filters">
         <input 
           type="text" 
           placeholder="Search by Date (YYYY-MM-DD)" 
-          value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
         />
         <div>
@@ -56,14 +62,12 @@ function App() {
           <input 
             type="number" 
             placeholder="Min Temp" 
-            value={tempRange.min}
             onChange={e => setTempRange(prev => ({ ...prev, min: e.target.value }))}
           />
           -
           <input 
             type="number" 
             placeholder="Max Temp" 
-            value={tempRange.max}
             onChange={e => setTempRange(prev => ({ ...prev, max: e.target.value }))}
           />
         </div>
@@ -72,31 +76,48 @@ function App() {
           <input 
             type="number" 
             placeholder="Min Humidity" 
-            value={humidityRange.min}
             onChange={e => setHumidityRange(prev => ({ ...prev, min: e.target.value }))}
           />
           -
           <input 
             type="number" 
             placeholder="Max Humidity" 
-            value={humidityRange.max}
             onChange={e => setHumidityRange(prev => ({ ...prev, max: e.target.value }))}
           />
         </div>
       </div>
 
-      {/* Table */}
+      <div className="chart-container">
+        <h2>Temperature Distribution Over Time</h2>
+        <BarChart
+          width={600}
+          height={300}
+          data={filteredData}
+          margin={{
+            top: 5, right: 30, left: 20, bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="datetime" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="temp" fill="#8884d8" name="Temperature (°C)" />
+        </BarChart>
+      </div>
+
       <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Temperature</th>
-            <th>Max Temperature</th>
-            <th>Min Temperature</th>
-            <th>Pressure</th>
-            <th>Humidity</th>
-          </tr>
-        </thead>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Temperature</th>
+          <th>Max Temperature</th>
+          <th>Min Temperature</th>
+          <th>Pressure</th>
+          <th>Humidity</th>
+          <th>Details</th>
+        </tr>
+      </thead>
         <tbody>
           {filteredData.map(day => (
             <tr key={day.datetime}>
@@ -106,13 +127,38 @@ function App() {
               <td>{day.min_temp}°C</td>
               <td>{day.pres} mb</td>
               <td>{day.rh}%</td>
+              <td>
+                <Link to={`/detail/${day.datetime}`}>Details</Link>
+              </td>
             </tr>
           ))}
-          {filteredData.length === 0 && <tr><td colSpan="6">No results found.</td></tr>}
+          {filteredData.length === 0 && <tr><td colSpan="7">No results found.</td></tr>}
         </tbody>
       </table>
     </div>
   );
 }
+
+
+function Detail({ weatherData }) {
+  const { date } = useParams();
+  const weather = weatherData && weatherData.data && weatherData.data.find(day => day.datetime === date);
+
+  if (!weather) return <div>Data not found for the given date.</div>;
+
+  return (
+      <div className="detail-view">
+          <h2>Weather Details for {date}</h2>
+          <p><strong>Temperature:</strong> {weather.temp}°C</p>
+          <p><strong>Max Temperature:</strong> {weather.max_temp}°C</p>
+          <p><strong>Min Temperature:</strong> {weather.min_temp}°C</p>
+          <p><strong>Pressure:</strong> {weather.pres} mb</p>
+          <p><strong>Humidity:</strong> {weather.rh}%</p>
+          <br />
+          <Link to="/"><button>Dashboard</button></Link>
+      </div>
+  );
+}
+
 
 export default App;
