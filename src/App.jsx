@@ -8,7 +8,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [tempRange, setTempRange] = useState({ min: '', max: '' });
   const [humidityRange, setHumidityRange] = useState({ min: '', max: '' });
-  const API_KEY = '91954f7fae494fc596b9343839ebcdbb';
+  const API_KEY = 'ooooppss';
 
   useEffect(() => {
     async function fetchData() {
